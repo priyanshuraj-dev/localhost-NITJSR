@@ -16,6 +16,18 @@ interface Props {
   onReset: () => void;
 }
 
+function getVisualGuide(data: SimplifiedOutput): string[] {
+  if (data.visualGuide && data.visualGuide.length > 0) return data.visualGuide;
+
+  if (!data.steps || data.steps.length === 0) return [];
+
+  return data.steps.slice(0, 6).map((step) => {
+    const emoji = step.icon?.trim() || "🔹";
+    const text = step.title || step.description || "Follow the next step.";
+    return `${emoji} ${text}`;
+  });
+}
+
 export default function SimplifiedView({ data, originalText, onReset }: Props) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -48,8 +60,8 @@ export default function SimplifiedView({ data, originalText, onReset }: Props) {
       </div>
 
       {/* Visual Guide */}
-      {data.visualGuide && data.visualGuide.length > 0 && (
-        <VisualGuide steps={data.visualGuide} />
+      {getVisualGuide(data).length > 0 && (
+        <VisualGuide steps={getVisualGuide(data)} />
       )}
 
       {/* Simplified Text */}

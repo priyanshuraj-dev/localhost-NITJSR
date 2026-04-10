@@ -3,22 +3,52 @@ import { getGeminiModel } from "@/lib/gemini";
 import { SIMPLIFICATION_PROMPT } from "@/lib/prompts";
 import { SimplifiedOutputSchema } from "@/lib/schemas";
 
+export const runtime = "nodejs";
+
+function guessMimeFromUrl(url: string): string {
+  const clean = url.split("?")[0].toLowerCase();
+  if (clean.endsWith(".pdf"))  return "application/pdf";
+  if (clean.endsWith(".png"))  return "image/png";
+  if (clean.endsWith(".jpg") || clean.endsWith(".jpeg")) return "image/jpeg";
+  if (clean.endsWith(".webp")) return "image/webp";
+  return "application/pdf";
+}
+
+async function fetchFileAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch file: ${res.status}`);
+  const contentType = res.headers.get("content-type") || "";
+  const isGeneric = !contentType || contentType.includes("octet-stream");
+  const mimeType = isGeneric ? guessMimeFromUrl(url) : contentType.split(";")[0].trim();
+  const buffer = await res.arrayBuffer();
+  return { base64: Buffer.from(buffer).toString("base64"), mimeType };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { text, language = "en" } = body;
+    const { text, cloudinaryUrl, language = "en" } = body;
 
-    if (!text || typeof text !== "string" || text.trim().length < 20) {
+    if (!cloudinaryUrl && (!text || typeof text !== "string" || text.trim().length < 20)) {
       return NextResponse.json(
-        { error: "Please provide valid text (minimum 20 characters)." },
+        { error: "Please provide valid text (minimum 20 characters) or a file URL." },
         { status: 400 }
       );
     }
 
     const model = getGeminiModel();
-    const prompt = SIMPLIFICATION_PROMPT(text.trim(), language);
+    const prompt = SIMPLIFICATION_PROMPT(text?.trim() || "", language);
 
-    const result = await model.generateContent(prompt);
+    let result;
+    if (cloudinaryUrl) {
+      const { base64, mimeType } = await fetchFileAsBase64(cloudinaryUrl);
+      result = await model.generateContent([
+        { inlineData: { mimeType, data: base64 } },
+        { text: prompt },
+      ]);
+    } else {
+      result = await model.generateContent(prompt);
+    }
     const rawText = result.response.text();
 
     // Strip markdown fences
