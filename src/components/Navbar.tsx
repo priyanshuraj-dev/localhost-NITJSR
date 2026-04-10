@@ -3,15 +3,18 @@
 import { useContext } from "react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
+import { useToast } from "@/components/Toast";
 import axios from "axios";
 
 export default function Navbar() {
   const { userData, setUserData, authLoading } = useContext(UserContext);
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleLogout = async () => {
     try { await axios.post("/api/auth/logout"); } catch {}
     setUserData(null);
+    toast("You've been signed out.", "info");
     router.push("/login");
   };
 

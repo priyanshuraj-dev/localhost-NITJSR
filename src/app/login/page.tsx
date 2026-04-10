@@ -5,10 +5,12 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import { UserContext } from "@/context/UserContext";
+import { useToast } from "@/components/Toast";
 
 export default function LoginPage() {
   const router = useRouter();
   const { setUserData } = useContext(UserContext);
+  const { toast } = useToast();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,9 +35,12 @@ export default function LoginPage() {
       // Fetch user data and update context so Navbar reflects logged-in state
       const me = await axios.get("/api/auth/getCurrent", { withCredentials: true });
       setUserData(me.data.data);
+      toast("Welcome back! Redirecting to dashboard…", "success");
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err?.response?.data?.error || "Login failed");
+      const msg = err?.response?.data?.error || "Login failed";
+      setError(msg);
+      toast(msg, "error");
     } finally {
       setLoading(false);
     }

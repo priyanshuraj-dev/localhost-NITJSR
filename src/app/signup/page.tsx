@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useToast } from "@/components/Toast";
 
 export default function RegisterPage() {
   const [hovered, setHovered] = useState(false);
@@ -9,7 +10,10 @@ export default function RegisterPage() {
     document.body.style.overflowY = "auto";
   }, []);
 
+  const { toast } = useToast();
+
   const handleGoogleSignup = () => {
+    toast("Redirecting to Google…", "info");
     const googleUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI}&response_type=code&scope=email%20profile&access_type=offline&prompt=consent`;
     window.location.href = googleUrl;
   };
