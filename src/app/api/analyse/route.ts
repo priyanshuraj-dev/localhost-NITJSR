@@ -5,18 +5,57 @@ import HistoryModel from "@/models/historyModel";
 
 export const runtime = "nodejs";
 
-// ─── Gemini REST call ─────────────────────────────────────────────────────────
-async function callGemini(prompt: string): Promise<string> {
+// ─── Fetch file from Cloudinary and return base64 + mimeType ─────────────────
+/** Guess MIME type from the file URL/extension when content-type is unreliable */
+function guessMimeFromUrl(url: string): string {
+  const clean = url.split("?")[0].toLowerCase();
+  if (clean.endsWith(".pdf"))  return "application/pdf";
+  if (clean.endsWith(".png"))  return "image/png";
+  if (clean.endsWith(".jpg") || clean.endsWith(".jpeg")) return "image/jpeg";
+  if (clean.endsWith(".webp")) return "image/webp";
+  if (clean.endsWith(".txt"))  return "text/plain";
+  if (clean.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  return "application/pdf"; // safe default for govt docs
+}
+
+async function fetchFileAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch file from Cloudinary: ${res.status}`);
+
+  const contentType = res.headers.get("content-type") || "";
+  // Cloudinary often returns "application/octet-stream" for PDFs stored as raw —
+  // fall back to guessing from the URL extension in that case.
+  const isGeneric = !contentType || contentType.includes("octet-stream");
+  const mimeType = isGeneric ? guessMimeFromUrl(url) : contentType.split(";")[0].trim();
+
+  const buffer = await res.arrayBuffer();
+  const base64 = Buffer.from(buffer).toString("base64");
+  return { base64, mimeType };
+}
+
+// ─── Gemini REST call — supports both text-only and inline file parts ─────────
+async function callGemini(
+  prompt: string,
+  filePart?: { base64: string; mimeType: string }
+): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
+  // Build parts: if we have a real file, send it as inlineData so Gemini can read it
+  const parts: unknown[] = filePart
+    ? [
+        { inlineData: { mimeType: filePart.mimeType, data: filePart.base64 } },
+        { text: prompt },
+      ]
+    : [{ text: prompt }];
+
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: [{ parts }],
       generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
     }),
   });
@@ -31,9 +70,9 @@ async function callGemini(prompt: string): Promise<string> {
 }
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
-function buildPrompt(content: string, language: string, isUrl: boolean): string {
-  const inputDesc = isUrl
-    ? `The user has uploaded a government document. Its Cloudinary URL is: ${content}\nAnalyse the document based on its URL context and provide guidance.`
+function buildPrompt(content: string, language: string, isFile: boolean): string {
+  const inputDesc = isFile
+    ? `The user has uploaded a government document (provided above as file data). Carefully read and analyse its actual content.`
     : `The user has pasted the following government document text:\n\n${content}`;
 
   return `You are NyayaSetu, an AI assistant that helps Indian citizens understand government documents and legal procedures.
@@ -96,13 +135,22 @@ export async function POST(req: NextRequest) {
   }
 
   // 3. Build prompt and call Gemini
-  const isUrl = !!cloudinaryUrl;
-  const content = cloudinaryUrl || text!;
-  const prompt = buildPrompt(content, language, isUrl);
+  // For file uploads: fetch the actual file bytes and send as inline data so
+  // Gemini can truly read the document instead of guessing from the URL.
+  let filePart: { base64: string; mimeType: string } | undefined;
+  if (cloudinaryUrl) {
+    try {
+      filePart = await fetchFileAsBase64(cloudinaryUrl);
+    } catch (err: any) {
+      return NextResponse.json({ error: `Could not fetch uploaded file: ${err.message}` }, { status: 502 });
+    }
+  }
+
+  const prompt = buildPrompt(text || "", language, !!cloudinaryUrl);
 
   let rawResponse: string;
   try {
-    rawResponse = await callGemini(prompt);
+    rawResponse = await callGemini(prompt, filePart);
   } catch (err: any) {
     return NextResponse.json({ error: `AI error: ${err.message}` }, { status: 502 });
   }
