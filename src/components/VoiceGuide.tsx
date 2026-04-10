@@ -20,9 +20,13 @@ export default function VoiceGuide({ data }: Props) {
     lines.push(`${data.title}.`);
     lines.push(data.summary);
 
-    if (data.visualGuide && data.visualGuide.length > 0) {
+    const visualGuideLines = data.visualGuide && data.visualGuide.length > 0
+      ? data.visualGuide
+      : data.steps.map((s) => `${s.icon?.trim() || "🔹"} ${s.title}`);
+
+    if (visualGuideLines.length > 0) {
       lines.push("Here is a quick overview of the process.");
-      data.visualGuide.forEach((g) => lines.push(g));
+      visualGuideLines.forEach((g) => lines.push(g));
     }
 
     lines.push(`There are ${data.steps.length} steps in total.`);
@@ -68,6 +72,15 @@ export default function VoiceGuide({ data }: Props) {
       gu: "gu-IN",
       kn: "kn-IN",
       pa: "pa-IN",
+      English: "en-IN",
+      Hindi: "hi-IN",
+      বাংলা: "bn-IN",
+      తెలుగు: "te-IN",
+      मराठी: "mr-IN",
+      தமிழ்: "ta-IN",
+      ગુજરાતી: "gu-IN",
+      ಕನ್ನಡ: "kn-IN",
+      ਪੰਜਾਬੀ: "pa-IN",
     };
     return map[data.language] || "en-IN";
   };

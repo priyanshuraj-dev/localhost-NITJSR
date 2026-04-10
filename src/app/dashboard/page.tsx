@@ -253,17 +253,21 @@ export default function DashboardPage() {
   const handleAnalyse = async () => {
     setAnalyseState("loading"); setAnalyseError("");
     try {
-      const body: Record<string, string> = { language: selectedLang };
-      if (inputMode === "file" && doneFiles[0] && doneFiles[0].cloudinaryUrl) {
-        body.cloudinaryUrl = doneFiles[0].cloudinaryUrl;
-        body.fileName      = doneFiles[0].name;
-      } else if (inputMode === "text") {
-        body.text = textInput; body.fileName = "Pasted Text";
+      if (inputMode === "file" && doneFiles[0]?.cloudinaryUrl) {
+        // For file uploads: redirect to /result with the cloudinary URL
+        sessionStorage.setItem("legalFileUrl", doneFiles[0].cloudinaryUrl);
+        sessionStorage.removeItem("legalText");
+        window.location.href = "/result";
+        return;
+      } else if (inputMode === "text" && textInput.trim().length >= 20) {
+        // For pasted text: redirect to /result with the text
+        sessionStorage.setItem("legalText", textInput.trim());
+        sessionStorage.removeItem("legalFileUrl");
+        window.location.href = "/result";
+        return;
       }
-      const res  = await fetch("/api/analyse", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      const data = await res.json();
-      if (data.success) { setResult(data.result); setAnalyseState("done"); }
-      else { setAnalyseError(data.error || "Analysis failed"); setAnalyseState("error"); }
+      setAnalyseError("Please upload a file or paste text first.");
+      setAnalyseState("error");
     } catch { setAnalyseError("Network error — please try again"); setAnalyseState("error"); }
   };
 
