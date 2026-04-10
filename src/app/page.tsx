@@ -240,7 +240,6 @@ function FloatingDocCard({
   scrollY: number;
 }) {
   const parallaxY = scrollY * (0.04 + card.id * 0.012);
-  const floatOffset = Math.sin(Date.now() / 2000 + card.delay * 10) * 4;
 
   return (
     <div
@@ -248,12 +247,12 @@ function FloatingDocCard({
         position: "absolute",
         left: card.x,
         top: card.y,
-        transform: `rotate(${card.rotation}deg) translateY(${-parallaxY + floatOffset}px)`,
+        transform: `rotate(${card.rotation}deg) translateY(${-parallaxY}px)`,
         transition: "transform 0.1s linear",
         zIndex: card.id,
         animationDelay: `${card.delay}s`,
       }}
-      className="floating-card-wrapper"
+      className="floating-card-wrapper float-anim"
     >
       <div
         style={{
@@ -366,15 +365,8 @@ export default function HomePage() {
   const scrollY = useScrollY();
   const [activeStep, setActiveStep] = useState(0);
   const [uploadState, setUploadState] = useState<"idle" | "dragging" | "loading" | "done">("idle");
-  const [tick, setTick] = useState(0);
   const stickyRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
-
-  // Tick for float animation
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 60);
-    return () => clearInterval(id);
-  }, []);
 
   // Sticky scroll story
   useEffect(() => {
