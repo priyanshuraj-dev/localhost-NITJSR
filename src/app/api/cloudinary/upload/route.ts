@@ -4,7 +4,7 @@ import busboy, { FileInfo } from "busboy";
 import { Readable } from "stream";
 import mongoose from "mongoose";
 import { connectDB } from "@/dbConfig/dbConfig";
-import { verifyJWT } from "@/lib/auth/jwt";
+import jwt from "jsonwebtoken";
 
 export const runtime = "nodejs";
 
@@ -86,27 +86,17 @@ function cloudinaryResourceType(
 
 // POST /api/cloudinary/upload
 export async function POST(req: NextRequest) {
-  //  1. Auth 
-  const authHeader = req.headers.get("authorization") || "";
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : null;
-
+  // 1. Auth — cookie-based (logtok)
+  const token = req.cookies.get("logtok")?.value;
   if (!token) {
-    return NextResponse.json(
-      { error: "Unauthorised: missing token" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorised: not logged in" }, { status: 401 });
   }
 
-  let jwtPayload: { sub: string; email: string };
+  let jwtPayload: { email: string };
   try {
-    jwtPayload = await verifyJWT(token); // throws if invalid / expired
+    jwtPayload = jwt.verify(token, process.env.JWT_SECRET!) as { email: string };
   } catch {
-    return NextResponse.json(
-      { error: "Unauthorised: invalid or expired token" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorised: invalid or expired session" }, { status: 401 });
   }
 
   // ── 2. Content-Type guard 
@@ -254,7 +244,7 @@ const bb = busboy({
 
     for (const result of uploadResults) {
       const doc = await GovDocument.create({
-        userId: jwtPayload.sub,
+        userId: jwtPayload.email,
         userEmail: jwtPayload.email,
         fileName: result.fileName,
         fileType: result.fileType,
