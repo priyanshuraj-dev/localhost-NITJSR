@@ -119,11 +119,11 @@ export async function POST(req: NextRequest) {
 
   // ── 3. File size guard (20 MB) ───────────────────────────────────────────
 const contentLength = req.headers.get("content-length");
-const MAX_SIZE = 20 * 1024 * 1024; // 20 MB in bytes
+const MAX_SIZE = 10 * 1024 * 1024; // 10 MB per file
 
 if (contentLength && parseInt(contentLength) > MAX_SIZE) {
   return NextResponse.json(
-    { error: "File too large. Maximum allowed size is 20 MB." },
+    { error: "File too large. Maximum allowed size is 10 MB." },
     { status: 413 }
   );
 }

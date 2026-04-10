@@ -37,6 +37,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Navbar from "@/components/Navbar";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface FloatingCard {
@@ -635,76 +636,7 @@ export default function HomePage() {
       `}</style>
 
       {/* ── NAV ──────────────────────────────────────────────────────────── */}
-      <nav
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          padding: "0 40px",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          background:
-            scrollY > 40
-              ? "rgba(250,247,244,0.92)"
-              : "transparent",
-          backdropFilter: scrollY > 40 ? "blur(12px)" : "none",
-          borderBottom: scrollY > 40 ? "1px solid rgba(212,196,176,0.4)" : "none",
-          transition: "all 0.35s ease",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
-              background: "#2C2420",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "14px",
-              color: "#FAF7F4",
-            }}
-          >
-            ◉
-          </div>
-          <span
-            style={{
-              fontFamily: "'DM Serif Display', serif",
-              fontSize: "18px",
-              color: "#2C2420",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            NyayaSetu
-          </span>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-          {["How it Works", "Languages", "Documents", "About"].map((l) => (
-            <a key={l} href="#" className="nav-link">
-              {l}
-            </a>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: "12px" }}>
-          <a href="/login" style={{ textDecoration: "none" }}>
-            <button className="pill-btn pill-btn-ghost" style={{ padding: "9px 20px", fontSize: "13px" }}>
-              Sign In
-            </button>
-          </a>
-          <a href="/signup" style={{ textDecoration: "none" }}>
-            <button className="pill-btn pill-btn-primary" style={{ padding: "9px 20px", fontSize: "13px" }}>
-              Get Started →
-            </button>
-          </a>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section

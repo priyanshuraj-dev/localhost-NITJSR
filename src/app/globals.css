@@ -1,26 +1,149 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── Light mode (default) ─────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --bg:          #FAF7F4;
+  --bg-card:     #FFFFFF;
+  --bg-subtle:   #F5F0EC;
+  --border:      #F0EBE5;
+  --border-mid:  #E8E0D4;
+  --text-primary:   #2C2420;
+  --text-secondary: #6B5E56;
+  --text-muted:     #A89888;
+  --accent:      #E8B4A0;
+  --sidebar-bg:  #FFFFFF;
+  --topnav-bg:   rgba(250,247,244,0.92);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Dark mode ────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:          #1A1410;
+  --bg-card:     #231D18;
+  --bg-subtle:   #2C2420;
+  --border:      #3A2E28;
+  --border-mid:  #4A3C34;
+  --text-primary:   #F0EBE5;
+  --text-secondary: #C4B0A4;
+  --text-muted:     #7A6A60;
+  --accent:      #E8B4A0;
+  --sidebar-bg:  #1E1814;
+  --topnav-bg:   rgba(26,20,16,0.92);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Base ─────────────────────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: 'DM Sans', Arial, sans-serif;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* ── Dark mode: force ALL elements to respect theme ───────────────── */
+
+/* Layout shells */
+[data-theme="dark"] .dash-layout,
+[data-theme="dark"] .dash-main,
+[data-theme="dark"] .dash-content { background: var(--bg) !important; color: var(--text-primary) !important; }
+
+/* Sidebar */
+[data-theme="dark"] aside { background: var(--sidebar-bg) !important; border-color: var(--border) !important; }
+[data-theme="dark"] aside * { color: var(--text-secondary); }
+[data-theme="dark"] aside p { color: var(--text-muted) !important; }
+
+/* Sidebar nav items */
+[data-theme="dark"] .sidebar-nav-item { color: var(--text-secondary) !important; background: transparent !important; }
+[data-theme="dark"] .sidebar-nav-item:hover { background: var(--bg-subtle) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .sidebar-nav-item.active { background: var(--accent) !important; color: #2C2420 !important; }
+
+/* Cards — override inline background: white */
+[data-theme="dark"] .card,
+[data-theme="dark"] .stat-card { background: var(--bg-card) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .card *,
+[data-theme="dark"] .stat-card * { color: inherit; }
+
+/* All divs/sections with hardcoded white/cream backgrounds */
+[data-theme="dark"] div[style*="background: white"],
+[data-theme="dark"] div[style*="background: #FFFFFF"],
+[data-theme="dark"] div[style*="background: #FAF7F4"],
+[data-theme="dark"] div[style*="background: #F5F0EC"],
+[data-theme="dark"] div[style*="background: #FAFAFA"],
+[data-theme="dark"] div[style*="background: #FFF8F5"],
+[data-theme="dark"] div[style*="background: #FFFBF8"],
+[data-theme="dark"] div[style*="background: #FFFBEB"],
+[data-theme="dark"] div[style*="background: #F0FAF0"],
+[data-theme="dark"] div[style*='background: "white"'],
+[data-theme="dark"] section[style*="background: #FAF7F4"],
+[data-theme="dark"] section[style*="background: #F5EDE4"] {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Text color overrides for hardcoded dark text */
+[data-theme="dark"] p[style*="color: #2C2420"],
+[data-theme="dark"] p[style*="color: #6B5E56"],
+[data-theme="dark"] p[style*="color: #A89888"],
+[data-theme="dark"] span[style*="color: #2C2420"],
+[data-theme="dark"] span[style*="color: #6B5E56"],
+[data-theme="dark"] span[style*="color: #A89888"],
+[data-theme="dark"] h1[style*="color: #2C2420"],
+[data-theme="dark"] h2[style*="color: #2C2420"],
+[data-theme="dark"] h3[style*="color: #2C2420"] { color: var(--text-primary) !important; }
+
+[data-theme="dark"] p[style*="color: #6B5E56"],
+[data-theme="dark"] span[style*="color: #6B5E56"] { color: var(--text-secondary) !important; }
+
+[data-theme="dark"] p[style*="color: #A89888"],
+[data-theme="dark"] span[style*="color: #A89888"] { color: var(--text-muted) !important; }
+
+/* Upload zone */
+[data-theme="dark"] .upload-zone { background: var(--bg-card) !important; border-color: var(--border-mid) !important; }
+[data-theme="dark"] .upload-zone:hover,
+[data-theme="dark"] .upload-zone.dragging { background: var(--bg-subtle) !important; border-color: var(--accent) !important; }
+[data-theme="dark"] .upload-zone.done { background: #1A2E1A !important; border-color: #4A8A4A !important; }
+
+/* File type buttons */
+[data-theme="dark"] .file-type-btn { background: var(--bg-card) !important; border-color: var(--border-mid) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .file-type-btn:hover { background: var(--bg-subtle) !important; border-color: var(--accent) !important; }
+[data-theme="dark"] .file-type-btn.selected { background: var(--bg-subtle) !important; border-color: var(--text-primary) !important; }
+
+/* Language badges */
+[data-theme="dark"] .lang-badge { background: var(--bg-card) !important; border-color: var(--border-mid) !important; color: var(--text-secondary) !important; }
+[data-theme="dark"] .lang-badge:hover,
+[data-theme="dark"] .lang-badge.selected { background: var(--text-primary) !important; color: var(--bg) !important; border-color: var(--text-primary) !important; }
+
+/* Pill buttons */
+[data-theme="dark"] .pill-btn-ghost { color: var(--text-primary) !important; border-color: var(--border-mid) !important; }
+[data-theme="dark"] .pill-btn-ghost:hover { background: var(--bg-subtle) !important; }
+
+/* History items */
+[data-theme="dark"] .history-item:hover { background: var(--bg-subtle) !important; }
+
+/* Inputs and textareas */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea {
+  background: var(--bg-subtle) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-mid) !important;
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder { color: var(--text-muted) !important; }
+
+/* Mode toggle in settings */
+[data-theme="dark"] .dash-content button[style*="background: white"] {
+  background: var(--bg-card) !important;
+  border-color: var(--border-mid) !important;
+}
+
+/* ── Nuclear fallback: any remaining hardcoded white boxes ─────────── */
+/* This catches inline style="background: white" that CSS attr selectors miss */
+[data-theme="dark"] .dash-content > div,
+[data-theme="dark"] .dash-content > div > div {
+  color: var(--text-primary);
+}
+
+/* Force all white/cream inline backgrounds in the content area */
+[data-theme="dark"] .dash-content {
+  --white-override: var(--bg-card);
+  color-scheme: dark;
 }
