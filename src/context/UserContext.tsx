@@ -21,16 +21,37 @@ export const UserContext = createContext<UserContextValue>({
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("userData");
+        return cached ? JSON.parse(cached) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
   const [authLoading, setAuthLoading] = useState(true);
+
+  const setUserDataWithCache = (data: UserData | null) => {
+    setUserData(data);
+    if (typeof window !== "undefined") {
+      if (data) {
+        sessionStorage.setItem("userData", JSON.stringify(data));
+      } else {
+        sessionStorage.removeItem("userData");
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await axios.get("/api/auth/getCurrent");
-        setUserData(response.data.data);
+        setUserDataWithCache(response.data.data);
       } catch {
-        setUserData(null);
+        setUserDataWithCache(null);
       } finally {
         setAuthLoading(false);
       }
@@ -39,7 +60,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userData, setUserData, authLoading }}>
+    <UserContext.Provider value={{ userData, setUserData: setUserDataWithCache, authLoading }}>
       {children}
     </UserContext.Provider>
   );
