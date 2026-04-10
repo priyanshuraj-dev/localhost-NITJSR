@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { useTokens } from "@/context/TokenContext";
 
 type UploadState = "idle" | "dragging" | "uploading" | "success" | "error";
 type AnalyseState = "idle" | "loading" | "done" | "error";
@@ -190,6 +191,7 @@ function AIResponsePanel({ result, onReset }: { result: AnalysisResult; onReset:
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const { t, dark } = useTokens();
   const [uploadState, setUploadState]       = useState<UploadState>("idle");
   const [analyseState, setAnalyseState]     = useState<AnalyseState>("idle");
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -277,22 +279,22 @@ export default function DashboardPage() {
   return (
     <div style={{ animation: "fadeSlideUp 0.5s ease both" }}>
       <div style={{ marginBottom: "32px" }}>
-        <span className="tag-chip" style={{ background: "#FFF0EB", color: "#A06040", marginBottom: "12px" }}>✦ Upload and Analyse</span>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(24px,3vw,36px)", color: "#2C2420", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "8px" }}>
+        <span className="tag-chip" style={{ background: dark ? "rgba(232,180,160,0.15)" : "#FFF0EB", color: "#A06040", marginBottom: "12px" }}>✦ Upload and Analyse</span>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(24px,3vw,36px)", color: t.text, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "8px" }}>
           Upload a Government Document
         </h1>
-        <p style={{ fontSize: "15px", color: "#6B5E56", lineHeight: 1.6 }}>Drop any legal notice, form, or procedure document and get a plain-language guide in seconds.</p>
+        <p style={{ fontSize: "15px", color: t.textSec, lineHeight: 1.6 }}>Drop any legal notice, form, or procedure document and get a plain-language guide in seconds.</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "24px", alignItems: "start" }}>
         <div className="card" style={{ padding: "32px" }}>
 
-          <div style={{ display: "flex", gap: "4px", background: "#F5F0EC", borderRadius: "12px", padding: "4px", marginBottom: "28px", width: "fit-content" }}>
+          <div style={{ display: "flex", gap: "4px", background: t.bgSubtle, borderRadius: "12px", padding: "4px", marginBottom: "28px", width: "fit-content" }}>
             {(["file", "text"] as const).map(mode => (
               <button key={mode} onClick={() => setInputMode(mode)}
                 style={{ padding: "8px 20px", borderRadius: "9px", border: "none", cursor: "pointer", fontSize: "13px", fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
-                  background: inputMode === mode ? "white" : "transparent",
-                  color:      inputMode === mode ? "#2C2420" : "#A89888",
+                  background: inputMode === mode ? t.bgCard : "transparent",
+                  color:      inputMode === mode ? t.text : t.textMuted,
                   boxShadow:  inputMode === mode ? "0 2px 8px rgba(0,0,0,0.06)" : "none", transition: "all 0.2s" }}>
                 {mode === "file" ? "📎 File Upload" : "✏️ Paste Text"}
               </button>
@@ -302,14 +304,14 @@ export default function DashboardPage() {
           {inputMode === "file" ? (
             <>
               <div style={{ marginBottom: "24px" }}>
-                <p style={{ fontSize: "12px", fontWeight: 600, color: "#A89888", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "12px" }}>File type</p>
+                <p style={{ fontSize: "12px", fontWeight: 600, color: t.textMuted, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "12px" }}>File type</p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px" }}>
                   {FILE_TYPES.map(ft => (
                     <button key={ft.id} className={"file-type-btn " + (selectedTypeId === ft.id ? "selected" : "")}
                       onClick={() => setSelectedTypeId(selectedTypeId === ft.id ? null : ft.id)}
-                      style={{ background: selectedTypeId === ft.id ? ft.color : "white" }}>
+                      style={{ background: selectedTypeId === ft.id ? ft.color : t.bgCard }}>
                       <span style={{ fontSize: "24px" }}>{ft.icon}</span>
-                      <span style={{ fontSize: "12px", fontWeight: 600, color: "#2C2420" }}>{ft.label}</span>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: t.text }}>{ft.label}</span>
                     </button>
                   ))}
                 </div>
