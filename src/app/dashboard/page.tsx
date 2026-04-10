@@ -326,7 +326,7 @@ export default function DashboardPage() {
                 {uploadState === "idle" && <>
                   <div style={{ fontSize: "48px", marginBottom: "16px", color: "#D4C4B0" }}>⬡</div>
                   <p style={{ fontSize: "16px", fontWeight: 600, color: "#2C2420", marginBottom: "8px" }}>Drop your document here</p>
-                  <p style={{ fontSize: "13px", color: "#A89888", marginBottom: "20px" }}>PDF, JPG, PNG, DOCX, TXT · Max 20 MB</p>
+                  <p style={{ fontSize: "13px", color: "#A89888", marginBottom: "20px" }}>PDF, JPG, PNG, DOCX, TXT · Max 10 MB</p>
                   <button className="pill-btn pill-btn-primary" style={{ fontSize: "13px", padding: "10px 22px" }}
                     onClick={e => { e.stopPropagation(); fileInputRef.current && fileInputRef.current.click(); }}>Browse Files</button>
                 </>}
@@ -437,7 +437,7 @@ export default function DashboardPage() {
           <div className="card" style={{ padding: "24px" }}>
             <p style={{ fontSize: "12px", fontWeight: 600, color: "#A89888", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "16px" }}>Supported formats</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-              {[{ icon: "📄", label: "PDF", desc: "Up to 20MB" }, { icon: "🖼️", label: "Images", desc: "JPG, PNG, WebP" }, { icon: "📝", label: "Word", desc: ".docx, .doc" }, { icon: "📃", label: "Text", desc: ".txt files" }].map((f, i) => (
+              {[{ icon: "📄", label: "PDF", desc: "Up to 10MB" }, { icon: "🖼️", label: "Images", desc: "JPG, PNG, WebP" }, { icon: "📝", label: "Word", desc: ".docx, .doc" }, { icon: "📃", label: "Text", desc: ".txt files" }].map((f, i) => (
                 <div key={i} style={{ padding: "12px", borderRadius: "12px", background: "#FAF7F4", border: "1px solid #F0EBE5" }}>
                   <span style={{ fontSize: "20px", display: "block", marginBottom: "4px" }}>{f.icon}</span>
                   <p style={{ fontSize: "12px", fontWeight: 600, color: "#2C2420" }}>{f.label}</p>

@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import mammoth from "mammoth";
 import { connectDB } from "@/dbConfig/dbConfig";
 import HistoryModel from "@/models/historyModel";
 
 export const runtime = "nodejs";
 
-// ─── Fetch file from Cloudinary and return base64 + mimeType ─────────────────
-/** Guess MIME type from the file URL/extension when content-type is unreliable */
+// ─── Supported Gemini inline MIME types ──────────────────────────────────────
+const GEMINI_INLINE_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
 function guessMimeFromUrl(url: string): string {
   const clean = url.split("?")[0].toLowerCase();
   if (clean.endsWith(".pdf"))  return "application/pdf";
@@ -15,25 +23,49 @@ function guessMimeFromUrl(url: string): string {
   if (clean.endsWith(".webp")) return "image/webp";
   if (clean.endsWith(".txt"))  return "text/plain";
   if (clean.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-  return "application/pdf"; // safe default for govt docs
+  return "application/pdf";
 }
 
-async function fetchFileAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+// ─── Fetch file — returns either inline data (PDF/image) or extracted text ───
+async function resolveFileContent(
+  url: string
+): Promise<{ type: "inline"; base64: string; mimeType: string } | { type: "text"; content: string }> {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed to fetch file from Cloudinary: ${res.status}`);
+  if (!res.ok) throw new Error(`Failed to fetch file: ${res.status}`);
 
   const contentType = res.headers.get("content-type") || "";
-  // Cloudinary often returns "application/octet-stream" for PDFs stored as raw —
-  // fall back to guessing from the URL extension in that case.
   const isGeneric = !contentType || contentType.includes("octet-stream");
   const mimeType = isGeneric ? guessMimeFromUrl(url) : contentType.split(";")[0].trim();
 
-  const buffer = await res.arrayBuffer();
-  const base64 = Buffer.from(buffer).toString("base64");
-  return { base64, mimeType };
+  const buffer = Buffer.from(await res.arrayBuffer());
+
+  // DOCX — extract text with mammoth (Gemini can't read DOCX natively)
+  if (
+    mimeType.includes("wordprocessingml") ||
+    mimeType.includes("msword") ||
+    url.toLowerCase().includes(".docx")
+  ) {
+    const result = await mammoth.extractRawText({ buffer });
+    const text = result.value?.trim();
+    if (!text) throw new Error("Could not extract text from Word document");
+    return { type: "text", content: text };
+  }
+
+  // TXT — just decode
+  if (mimeType === "text/plain" || url.toLowerCase().endsWith(".txt")) {
+    return { type: "text", content: buffer.toString("utf-8").trim() };
+  }
+
+  // PDF / image — send as inline data directly to Gemini
+  if (GEMINI_INLINE_TYPES.has(mimeType)) {
+    return { type: "inline", base64: buffer.toString("base64"), mimeType };
+  }
+
+  // Fallback: try to send as PDF inline
+  return { type: "inline", base64: buffer.toString("base64"), mimeType: "application/pdf" };
 }
 
-// ─── Gemini REST call — supports both text-only and inline file parts ─────────
+// ─── Gemini REST call ─────────────────────────────────────────────────────────
 async function callGemini(
   prompt: string,
   filePart?: { base64: string; mimeType: string }
@@ -41,14 +73,10 @@ async function callGemini(
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-  // Build parts: if we have a real file, send it as inlineData so Gemini can read it
   const parts: unknown[] = filePart
-    ? [
-        { inlineData: { mimeType: filePart.mimeType, data: filePart.base64 } },
-        { text: prompt },
-      ]
+    ? [{ inlineData: { mimeType: filePart.mimeType, data: filePart.base64 } }, { text: prompt }]
     : [{ text: prompt }];
 
   const res = await fetch(url, {
@@ -134,19 +162,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Provide either cloudinaryUrl or text" }, { status: 400 });
   }
 
-  // 3. Build prompt and call Gemini
-  // For file uploads: fetch the actual file bytes and send as inline data so
-  // Gemini can truly read the document instead of guessing from the URL.
+  // 3. Resolve file content — inline for PDF/images, extracted text for DOCX/TXT
   let filePart: { base64: string; mimeType: string } | undefined;
+  let extractedText = text || "";
+
   if (cloudinaryUrl) {
     try {
-      filePart = await fetchFileAsBase64(cloudinaryUrl);
+      const resolved = await resolveFileContent(cloudinaryUrl);
+      if (resolved.type === "inline") {
+        filePart = { base64: resolved.base64, mimeType: resolved.mimeType };
+      } else {
+        extractedText = resolved.content;
+      }
     } catch (err: any) {
-      return NextResponse.json({ error: `Could not fetch uploaded file: ${err.message}` }, { status: 502 });
+      return NextResponse.json({ error: `Could not read uploaded file: ${err.message}` }, { status: 502 });
     }
   }
 
-  const prompt = buildPrompt(text || "", language, !!cloudinaryUrl);
+  const prompt = buildPrompt(extractedText, language, !!filePart);
 
   let rawResponse: string;
   try {
