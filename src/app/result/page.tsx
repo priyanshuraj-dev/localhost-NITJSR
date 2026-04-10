@@ -9,38 +9,46 @@ import LanguageSelector from "@/components/LanguageSelector";
 export default function ResultPage() {
   const { data, loading, error, simplify, reset } = useSimplify();
   const [originalText, setOriginalText] = useState("");
+  const [cloudinaryUrl, setCloudinaryUrl] = useState("");
   const [language, setLanguage] = useState("en");
   const [textLoaded, setTextLoaded] = useState(false);
 
   useEffect(() => {
     const storedText = sessionStorage.getItem("legalText") || "";
+    const storedUrl = sessionStorage.getItem("legalFileUrl") || "";
     const urlParams = new URLSearchParams(window.location.search);
     const queryText = urlParams.get("text") || "";
     const text = storedText || queryText;
     if (text) setOriginalText(text);
+    if (storedUrl) setCloudinaryUrl(storedUrl);
     setTextLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (textLoaded && originalText) {
+    if (!textLoaded) return;
+    if (cloudinaryUrl) {
+      simplify("", language, cloudinaryUrl);
+    } else if (originalText) {
       simplify(originalText, language);
     }
-  }, [textLoaded, originalText]);
+  }, [textLoaded, originalText, cloudinaryUrl]);
 
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
-    if (originalText) simplify(originalText, lang);
+    if (cloudinaryUrl) simplify("", lang, cloudinaryUrl);
+    else if (originalText) simplify(originalText, lang);
   };
 
   const handleReset = () => {
     reset();
     sessionStorage.removeItem("legalText");
+    sessionStorage.removeItem("legalFileUrl");
     window.location.href = "/";
   };
 
   if (!textLoaded) return null;
 
-  if (!originalText) {
+  if (!originalText && !cloudinaryUrl) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-3">

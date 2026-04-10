@@ -87,11 +87,13 @@ Rules:
 - steps must be in logical order with relevant emojis as icons
 - formLinks must use real, working government URLs (NSDL, UTIITSL, DigiLocker, MCA, etc.)
 - portalLinks must use real official Indian government portal URLs
-- visualGuide should be 4-6 short lines, each starting with a relevant emoji, telling the story of the process visually
-- If a field is not found in the text, use your knowledge of Indian government procedures to fill it
-- warnings should highlight potential rejection risks or missing requirements
-- ALL text content must be in ${LANGUAGES[language] || "English"}
-- Return ONLY the JSON object, nothing else
+- visualGuide should be 4-6 short lines, each starting with a relevant emoji, telling the story of the process visually.
+- If the document describes a process, infer the workflow and never leave visualGuide empty.
+- If a field is not found in the text, use your knowledge of Indian government procedures to fill it.
+- warnings should highlight potential rejection risks or missing requirements.
+- ALL text content must be in ${LANGUAGES[language] || "English"} only.
+- Do not include multiple languages inside the output values.
+- Return ONLY the JSON object, nothing else.
 `;
 
 export const CHAT_CONTEXT_PROMPT = (
