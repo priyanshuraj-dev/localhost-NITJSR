@@ -3,27 +3,23 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface History extends Document {
   email: string;
   nameDoc: string;
-  uploadUrl: string;
-  inputText: string;       // raw text if user pasted text instead of file
-  language: string;        // output language requested
-  details: string;         // full AI JSON response (stringified)
+  uploadUrl: string;        // input file on Cloudinary (image/pdf/txt)
+  outputUrl: string;        // output JSON on Cloudinary
+  inputText: string;
+  language: string;
+  simplifiedOutput: string; // full SimplifiedOutput JSON string
   createdAt: Date;
 }
 
 const HistorySchema: Schema<History> = new Schema(
   {
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      // NOT unique — one user has many history entries
-      match: [/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i, "Invalid email"],
-      index: true,
-    },
-    nameDoc: { type: String, default: "Pasted Text" },
-    uploadUrl: { type: String, default: "" },
-    inputText: { type: String, default: "" },
-    language: { type: String, default: "English" },
-    details: { type: String, required: true }, // JSON string of AI response
+    email:            { type: String, required: true, index: true },
+    nameDoc:          { type: String, default: "Document" },
+    uploadUrl:        { type: String, default: "" },
+    outputUrl:        { type: String, default: "" },
+    inputText:        { type: String, default: "" },
+    language:         { type: String, default: "en" },
+    simplifiedOutput: { type: String, default: "" },
   },
   { timestamps: true }
 );
