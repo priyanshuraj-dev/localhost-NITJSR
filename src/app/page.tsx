@@ -701,12 +701,16 @@ export default function HomePage() {
         </div>
 
         <div style={{ display: "flex", gap: "12px" }}>
-          <button className="pill-btn pill-btn-ghost" style={{ padding: "9px 20px", fontSize: "13px" }}>
-            Sign In
-          </button>
-          <button className="pill-btn pill-btn-primary" style={{ padding: "9px 20px", fontSize: "13px" }}>
-            Get Started →
-          </button>
+          <a href="/login" style={{ textDecoration: "none" }}>
+            <button className="pill-btn pill-btn-ghost" style={{ padding: "9px 20px", fontSize: "13px" }}>
+              Sign In
+            </button>
+          </a>
+          <a href="/signup" style={{ textDecoration: "none" }}>
+            <button className="pill-btn pill-btn-primary" style={{ padding: "9px 20px", fontSize: "13px" }}>
+              Get Started →
+            </button>
+          </a>
         </div>
       </nav>
 
