@@ -8,6 +8,7 @@ export interface History extends Document {
   inputText: string;
   language: string;
   simplifiedOutput: string; // full SimplifiedOutput JSON string
+  details?: string;
   createdAt: Date;
 }
 
@@ -20,6 +21,7 @@ const HistorySchema: Schema<History> = new Schema(
     inputText:        { type: String, default: "" },
     language:         { type: String, default: "en" },
     simplifiedOutput: { type: String, default: "" },
+    details: { type: String, default: "" },
   },
   { timestamps: true }
 );
