@@ -73,7 +73,7 @@ async function callGemini(
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY not set");
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   const parts: unknown[] = filePart
     ? [{ inlineData: { mimeType: filePart.mimeType, data: filePart.base64 } }, { text: prompt }]
@@ -97,7 +97,25 @@ async function callGemini(
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
-// ─── Prompt builder ───────────────────────────────────────────────────────────
+// ─── URL normalizer ───────────────────────────────────────────────────────────
+
+function normalizeUrl(raw: string): string | null {
+  if (!raw || typeof raw !== "string" || raw.trim() === "") return null;
+  let url = raw.trim();
+  if (!url.startsWith("http")) url = "https://" + url;
+  url = url.replace(/^http:\/\//i, "https://");
+  try { new URL(url); return url; } catch { return null; }
+}
+
+function filterLinks<T extends { url: string }>(links: T[]): T[] {
+  return links.reduce<T[]>((acc, link) => {
+    const clean = normalizeUrl(link.url);
+    if (clean) acc.push({ ...link, url: clean });
+    return acc;
+  }, []);
+}
+
+
 function buildPrompt(content: string, language: string, isFile: boolean): string {
   const inputDesc = isFile
     ? `The user has uploaded a government document (provided above as file data). Carefully read and analyse its actual content.`
@@ -120,8 +138,11 @@ Respond ONLY with a valid JSON object (no markdown, no code fences) in this exac
   "authorities": [
     { "name": "string", "role": "string", "contact": "string or empty" }
   ],
+  "formLinks": [
+    { "name": "string — form name e.g. Form 49A", "url": "string — direct URL to download or fill the form", "description": "string — what this form is for" }
+  ],
   "portalLinks": [
-    { "label": "string", "url": "string — real government portal URL if known, else empty" }
+    { "label": "string — portal name", "url": "string — real government portal URL if known, else empty" }
   ],
   "warnings": ["array of important deadlines, penalties, or cautions — can be empty array"],
   "estimatedTotalTime": "string — total estimated time to complete the procedure",
@@ -130,6 +151,20 @@ Respond ONLY with a valid JSON object (no markdown, no code fences) in this exac
 
 ${language !== "English" ? `Translate all string values (summary, keyPoints, steps descriptions, etc.) to ${language}. Keep JSON keys in English.` : ""}
 
+- formLinks: Use ONLY real, verified Indian government form URLs. Valid base domains:
+    PAN: https://www.onlineservices.nsdl.com, https://www.utiitsl.com
+    Income Tax: https://www.incometax.gov.in
+    GST: https://www.gst.gov.in
+    Passport: https://www.passportindia.gov.in
+    Aadhaar: https://myaadhaar.uidai.gov.in
+    EPF: https://unifiedportal-mem.epfindia.gov.in
+    MCA: https://www.mca.gov.in
+    DigiLocker: https://www.digilocker.gov.in
+    RTI: https://rtionline.gov.in
+    Voter ID: https://voters.eci.gov.in
+  Only include a formLink if you are confident the URL path is real. If unsure of the exact path, use the portal homepage instead.
+- portalLinks: Use ONLY the homepage or main service page of official portals from the domains above.
+- If no relevant forms or portals exist, return empty arrays for those fields
 Be accurate, helpful, and specific to Indian government procedures.`;
 }
 
@@ -191,12 +226,16 @@ export async function POST(req: NextRequest) {
   // 4. Parse AI JSON response
   let analysisResult: Record<string, unknown>;
   try {
-    // Strip any accidental markdown fences
     const cleaned = rawResponse.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
     analysisResult = JSON.parse(cleaned);
   } catch {
-    // Return raw text if JSON parse fails
     analysisResult = { raw: rawResponse, parseError: true };
+  }
+
+  // 4b. Validate & filter links — remove hallucinated or non-gov URLs
+  if (!analysisResult.parseError) {
+    analysisResult.formLinks = filterLinks((analysisResult.formLinks as { url: string }[] | undefined) ?? []);
+    analysisResult.portalLinks = filterLinks((analysisResult.portalLinks as { url: string }[] | undefined) ?? []);
   }
 
   // 5. Save to History
@@ -208,7 +247,7 @@ export async function POST(req: NextRequest) {
       uploadUrl: cloudinaryUrl || "",
       inputText: text || "",
       language,
-      details: JSON.stringify(analysisResult),
+      simplifiedOutput: JSON.stringify(analysisResult),
     });
   } catch (err) {
     // Don't fail the request if history save fails — just log it

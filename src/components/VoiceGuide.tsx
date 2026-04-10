@@ -130,10 +130,10 @@ export default function VoiceGuide({ data }: Props) {
   if (!supported) return null;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5">
+    <div className="bg-white border rounded-xl p-5" style={{ borderColor: "#F0EBE5" }}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-gray-800">🔊 Voice Guidance</h2>
-        <span className="text-xs text-gray-400">Powered by Browser TTS</span>
+        <h2 className="font-semibold" style={{ color: "#2C2420" }}>🔊 Voice Guidance</h2>
+        <span className="text-xs" style={{ color: "#A89888" }}>Powered by Browser TTS</span>
       </div>
 
       {/* Main Controls */}
@@ -141,21 +141,24 @@ export default function VoiceGuide({ data }: Props) {
         {!isPlaying ? (
           <button
             onClick={playAll}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+            className="flex items-center gap-2 text-sm font-medium"
+            style={{ padding: "8px 18px", background: "#2C2420", color: "#FAF7F4", border: "none", borderRadius: "100px", cursor: "pointer" }}
           >
             ▶ Read Full Guide
           </button>
         ) : (
           <button
             onClick={stop}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition"
+            className="flex items-center gap-2 text-sm font-medium"
+            style={{ padding: "8px 18px", background: "#C0504A", color: "white", border: "none", borderRadius: "100px", cursor: "pointer" }}
           >
             ⏹ Stop
           </button>
         )}
         <button
           onClick={() => speakSingle(data.summary)}
-          className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
+          className="text-sm"
+          style={{ padding: "8px 18px", border: "1.5px solid #E8E0D4", borderRadius: "100px", color: "#6B5E56", background: "transparent", cursor: "pointer" }}
         >
           🔈 Read Summary
         </button>
@@ -163,27 +166,26 @@ export default function VoiceGuide({ data }: Props) {
 
       {/* Steps with individual speak buttons */}
       <div className="space-y-2">
-        <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: "#A89888" }}>
           Speak individual steps:
         </p>
         {data.steps.map((step, i) => (
           <div
             key={i}
-            className={`flex items-center gap-3 p-3 rounded-lg border transition ${
-              currentLine !== -1 && isPlaying && i === Math.max(0, currentLine - 2)
-                ? "border-blue-300 bg-blue-50"
-                : "border-gray-100"
-            }`}
+            className="flex items-center gap-3 p-3 rounded-lg border transition"
+            style={{
+              borderColor: currentLine !== -1 && isPlaying && i === Math.max(0, currentLine - 2) ? "#E8B4A0" : "#F0EBE5",
+              background: currentLine !== -1 && isPlaying && i === Math.max(0, currentLine - 2) ? "#FFF8F5" : "transparent",
+            }}
           >
             <span className="text-lg">{step.icon || "📌"}</span>
-            <span className="flex-1 text-sm text-gray-700">
+            <span className="flex-1 text-sm" style={{ color: "#4A3C34" }}>
               Step {step.stepNumber}: {step.title}
             </span>
             <button
-              onClick={() =>
-                speakSingle(`Step ${step.stepNumber}: ${step.title}. ${step.description}`)
-              }
-              className="text-xs px-2 py-1 bg-gray-100 rounded hover:bg-blue-100 hover:text-blue-700 transition"
+              onClick={() => speakSingle(`Step ${step.stepNumber}: ${step.title}. ${step.description}`)}
+              className="text-xs px-2 py-1 rounded transition"
+              style={{ background: "#F0EBE5", color: "#6B5E56", border: "none", cursor: "pointer" }}
             >
               🔊
             </button>

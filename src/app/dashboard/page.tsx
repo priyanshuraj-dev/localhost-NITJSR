@@ -19,6 +19,7 @@ interface AnalysisResult {
   steps?: AnalysisStep[];
   requiredDocuments?: string[];
   authorities?: { name: string; role: string; contact: string }[];
+  formLinks?: { name: string; url: string; description?: string }[];
   portalLinks?: { label: string; url: string }[];
   warnings?: string[];
   estimatedTotalTime?: string; difficulty?: string;
@@ -110,12 +111,64 @@ function AIResponsePanel({ result, onReset }: { result: AnalysisResult; onReset:
                       <p style={{ fontSize:"14px", fontWeight:600, color:"#2C2420", marginBottom:"4px" }}>{s.title}</p>
                       <p style={{ fontSize:"13px", color:"#6B5E56", lineHeight:1.6, marginBottom:"8px" }}>{s.description}</p>
                       <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                        {s.office && <span className="tag-chip" style={{ background:"#EBF0FF", color:"#4060A0" }}>🏛 {s.office}</span>}
+                        {s.office && <span className="tag-chip" style={{ background:"#F0EBE5", color:"#6B5E56" }}>🏛 {s.office}</span>}
                         {s.timeframe && <span className="tag-chip" style={{ background:"#F0EBE5", color:"#6B5E56" }}>⏱ {s.timeframe}</span>}
                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Forms & Portals */}
+          {((result.formLinks && result.formLinks.length > 0) || (result.portalLinks && result.portalLinks.length > 0)) && (
+            <div className="card" style={{ padding:"24px", gridColumn:"1 / -1" }}>
+              <p style={{ fontSize:"12px", fontWeight:600, color:"#A89888", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:"20px" }}>🔗 Forms & Government Portals</p>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px" }}>
+                {result.formLinks && result.formLinks.length > 0 && (
+                  <div>
+                    <p style={{ fontSize:"11px", fontWeight:600, color:"#A89888", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:"10px" }}>📄 Official Forms</p>
+                    <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                      {result.formLinks.map((f, i) => (
+                        <a key={i} href={f.url} target="_blank" rel="noreferrer"
+                          style={{ display:"flex", alignItems:"flex-start", gap:"12px", padding:"12px 14px", borderRadius:"14px", border:"1px solid #F0EBE5", background:"#FAF7F4", textDecoration:"none", transition:"all 0.2s" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8B4A0"; (e.currentTarget as HTMLAnchorElement).style.background = "#FFF8F5"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#F0EBE5"; (e.currentTarget as HTMLAnchorElement).style.background = "#FAF7F4"; }}
+                        >
+                          <span style={{ fontSize:"20px", flexShrink:0 }}>📋</span>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <p style={{ fontSize:"13px", fontWeight:600, color:"#2C2420", marginBottom:"2px" }}>{f.name}</p>
+                            {f.description && <p style={{ fontSize:"11px", color:"#A89888", lineHeight:1.5 }}>{f.description}</p>}
+                            <p style={{ fontSize:"11px", color:"#C4845A", marginTop:"2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{f.url}</p>
+                          </div>
+                          <span style={{ color:"#D4C4B0", fontSize:"16px", flexShrink:0 }}>↗</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {result.portalLinks && result.portalLinks.length > 0 && (
+                  <div>
+                    <p style={{ fontSize:"11px", fontWeight:600, color:"#A89888", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:"10px" }}>🌐 Government Portals</p>
+                    <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                      {result.portalLinks.map((p, i) => (
+                        <a key={i} href={p.url} target="_blank" rel="noreferrer"
+                          style={{ display:"flex", alignItems:"flex-start", gap:"12px", padding:"12px 14px", borderRadius:"14px", border:"1px solid #F0EBE5", background:"#FAF7F4", textDecoration:"none", transition:"all 0.2s" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8B4A0"; (e.currentTarget as HTMLAnchorElement).style.background = "#FFF8F5"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#F0EBE5"; (e.currentTarget as HTMLAnchorElement).style.background = "#FAF7F4"; }}
+                        >
+                          <span style={{ fontSize:"20px", flexShrink:0 }}>🏛️</span>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <p style={{ fontSize:"13px", fontWeight:600, color:"#2C2420", marginBottom:"2px" }}>{p.label}</p>
+                            <p style={{ fontSize:"11px", color:"#C4845A", marginTop:"2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{p.url}</p>
+                          </div>
+                          <span style={{ color:"#D4C4B0", fontSize:"16px", flexShrink:0 }}>↗</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
