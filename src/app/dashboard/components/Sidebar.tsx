@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
 import axios from "axios";
@@ -39,10 +39,13 @@ export default function DashboardSidebar({
 }) {
   const tk = t ?? DEFAULT_TOKENS;
   const [active, setActive] = useState("upload");
+  const [mounted, setMounted] = useState(false);
   const { userData, setUserData } = useContext(UserContext);
   const router = useRouter();
 
-  const initials = userData?.email ? userData.email.slice(0, 2).toUpperCase() : "??";
+  useEffect(() => { setMounted(true); }, []);
+
+  const initials = mounted && userData?.email ? userData.email.slice(0, 2).toUpperCase() : "??";
 
   const handleLogout = async () => {
     try { await axios.post("/api/auth/logout"); } catch {}
@@ -132,7 +135,7 @@ export default function DashboardSidebar({
             </div>
             <div style={{ minWidth: 0 }}>
               <p style={{ fontSize: "13px", fontWeight: 600, color: tk.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {userData?.email ?? "Guest"}
+              {mounted ? (userData?.email ?? "Guest") : "Guest"}
               </p>
               <p style={{ fontSize: "11px", color: tk.textMuted }}>Free Plan</p>
             </div>
