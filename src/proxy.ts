@@ -11,11 +11,11 @@ export function proxy(request: NextRequest) {
   const isProtected = path.startsWith("/dashboard");
 
   const isAuthPage =
-    path.startsWith("/login") || path.startsWith("/register");
+    path.startsWith("/login") || path.startsWith("/signup");
 
   // // 1. fillcredentials requires eAuthToken
   if (isFillCredentials && !eAuthToken) {
-    return NextResponse.redirect(new URL("/register", request.url));
+    return NextResponse.redirect(new URL("/signup", request.url));
   }
 
   // // 2. payreg & dashboard require logTok
@@ -36,6 +36,6 @@ export const config = {
     "/fillCredentials",
     "/dashboard",
     "/login",
-    "/register",
+    "/signup",
   ],
 };
