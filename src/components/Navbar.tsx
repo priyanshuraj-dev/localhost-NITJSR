@@ -184,7 +184,9 @@ export default function Navbar() {
 
           {/* Auth actions */}
           <div className="nyaya-actions">
-            {authLoading ? null : userData ? (
+            {authLoading ? (
+              <div style={{ width: "120px", height: "34px", borderRadius: "100px", background: "rgba(44,36,32,0.06)", animation: "pulse 1.5s ease-in-out infinite" }} />
+            ) : userData ? (
               <>
                 <div
                   className="nyaya-avatar"
