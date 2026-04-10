@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
     const prompt = CHAT_CONTEXT_PROMPT(
       originalText || "",
       JSON.stringify(simplifiedOutput || {}),
-      question.trim()
+      question.trim(),
+      simplifiedOutput?.language || "en"
     );
 
     const result = await model.generateContent(prompt);
