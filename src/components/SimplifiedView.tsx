@@ -40,7 +40,7 @@ export default function SimplifiedView({ data, originalText, onReset }: Props) {
         </div>
         <button
           onClick={onReset}
-          className="text-sm px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition"
+          style={{ fontSize: "13px", padding: "8px 18px", borderRadius: "100px", border: "1.5px solid #E8E0D4", background: "transparent", color: "#6B5E56", cursor: "pointer" }}
         >
           ← Analyze New Document
         </button>
@@ -54,9 +54,9 @@ export default function SimplifiedView({ data, originalText, onReset }: Props) {
       </div>
 
       {/* Summary */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-        <h2 className="font-semibold text-blue-800 mb-2">📌 Summary</h2>
-        <p className="text-gray-700 leading-relaxed">{data.summary}</p>
+      <div style={{ background: "#FFF8F5", border: "1px solid #F0D8C8", borderRadius: "16px", padding: "20px" }}>
+        <h2 className="font-semibold mb-2" style={{ color: "#2C2420" }}>📌 Summary</h2>
+        <p className="leading-relaxed" style={{ color: "#4A3C34" }}>{data.summary}</p>
       </div>
 
       {/* Visual Guide */}
@@ -65,9 +65,9 @@ export default function SimplifiedView({ data, originalText, onReset }: Props) {
       )}
 
       {/* Simplified Text */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h2 className="font-semibold text-gray-800 mb-3">📄 Simplified Explanation</h2>
-        <p className="text-gray-700 leading-relaxed whitespace-pre-line">{data.simplifiedText}</p>
+      <div style={{ background: "#FFFFFF", border: "1px solid #F0EBE5", borderRadius: "16px", padding: "20px" }}>
+        <h2 className="font-semibold mb-3" style={{ color: "#2C2420" }}>📄 Simplified Explanation</h2>
+        <p className="leading-relaxed whitespace-pre-line" style={{ color: "#4A3C34" }}>{data.simplifiedText}</p>
       </div>
 
       {/* Warnings */}
@@ -98,11 +98,11 @@ export default function SimplifiedView({ data, originalText, onReset }: Props) {
 
 function StatCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3 flex items-center gap-3">
+    <div style={{ background: "#FFFFFF", border: "1px solid #F0EBE5", borderRadius: "16px", padding: "12px 16px" }} className="flex items-center gap-3">
       <span className="text-2xl">{icon}</span>
       <div>
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="font-semibold text-gray-800 text-sm">{value}</p>
+        <p className="text-xs" style={{ color: "#A89888" }}>{label}</p>
+        <p className="font-semibold text-sm" style={{ color: "#2C2420" }}>{value}</p>
       </div>
     </div>
   );

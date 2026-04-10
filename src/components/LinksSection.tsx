@@ -15,13 +15,13 @@ export default function LinksSection({ formLinks, portalLinks }: Props) {
   if (!hasLinks) return null;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-5">
-      <h2 className="font-semibold text-gray-800">🔗 Forms & Government Portals</h2>
+    <div style={{ background: "#FFFFFF", border: "1px solid #F0EBE5", borderRadius: "16px", padding: "20px" }} className="space-y-5">
+      <h2 className="font-semibold" style={{ color: "#2C2420" }}>🔗 Forms & Government Portals</h2>
 
       {/* Form Links */}
       {formLinks && formLinks.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "#A89888" }}>
             📄 Official Forms
           </p>
           <div className="space-y-2">
@@ -31,26 +31,29 @@ export default function LinksSection({ formLinks, portalLinks }: Props) {
                 href={form.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-blue-300 hover:bg-blue-50 transition group"
+                className="flex items-start gap-3 p-3 rounded-lg border transition group"
+                style={{ borderColor: "#F0EBE5", textDecoration: "none" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8B4A0"; (e.currentTarget as HTMLAnchorElement).style.background = "#FFF8F5"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#F0EBE5"; (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
               >
                 <span className="text-2xl">📋</span>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm text-gray-800 group-hover:text-blue-700">
+                    <span className="font-medium text-sm" style={{ color: "#2C2420" }}>
                       {form.name}
                     </span>
                     {form.isOfficial && (
-                      <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                      <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#E8F5E4", color: "#4A8040" }}>
                         ✓ Official
                       </span>
                     )}
                   </div>
                   {form.description && (
-                    <p className="text-xs text-gray-500 mt-0.5">{form.description}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#A89888" }}>{form.description}</p>
                   )}
-                  <p className="text-xs text-blue-400 mt-0.5 truncate">{form.url}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: "#C4845A" }}>{form.url}</p>
                 </div>
-                <span className="text-gray-300 group-hover:text-blue-400 text-lg">↗</span>
+                <span className="text-lg" style={{ color: "#D4C4B0" }}>↗</span>
               </a>
             ))}
           </div>
@@ -60,7 +63,7 @@ export default function LinksSection({ formLinks, portalLinks }: Props) {
       {/* Portal Links */}
       {portalLinks && portalLinks.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "#A89888" }}>
             🌐 Government Portals
           </p>
           <div className="space-y-2">
@@ -70,19 +73,22 @@ export default function LinksSection({ formLinks, portalLinks }: Props) {
                 href={portal.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-indigo-300 hover:bg-indigo-50 transition group"
+                className="flex items-start gap-3 p-3 rounded-lg border transition group"
+                style={{ borderColor: "#F0EBE5", textDecoration: "none" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8B4A0"; (e.currentTarget as HTMLAnchorElement).style.background = "#FFF8F5"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#F0EBE5"; (e.currentTarget as HTMLAnchorElement).style.background = "transparent"; }}
               >
                 <span className="text-2xl">🏛️</span>
                 <div className="flex-1">
-                  <span className="font-medium text-sm text-gray-800 group-hover:text-indigo-700">
+                  <span className="font-medium text-sm" style={{ color: "#2C2420" }}>
                     {portal.name}
                   </span>
                   {portal.description && (
-                    <p className="text-xs text-gray-500 mt-0.5">{portal.description}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#A89888" }}>{portal.description}</p>
                   )}
-                  <p className="text-xs text-indigo-400 mt-0.5 truncate">{portal.url}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: "#C4845A" }}>{portal.url}</p>
                 </div>
-                <span className="text-gray-300 group-hover:text-indigo-400 text-lg">↗</span>
+                <span className="text-lg" style={{ color: "#D4C4B0" }}>↗</span>
               </a>
             ))}
           </div>

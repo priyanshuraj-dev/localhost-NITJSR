@@ -1,16 +1,16 @@
 import { z } from "zod";
 
 export const StepSchema = z.object({
-  stepNumber: z.number(),
+  stepNumber: z.coerce.number(),
   title: z.string(),
   description: z.string(),
   tip: z.string().optional().nullable(),
-  icon: z.string().optional().nullable(), // emoji icon for visual guide
+  icon: z.string().optional().nullable(),
 });
 
 export const DocumentSchema = z.object({
   name: z.string(),
-  required: z.boolean(),
+  required: z.coerce.boolean(),
   description: z.string(),
   alternatives: z.array(z.string()).optional().nullable(),
 });
@@ -26,7 +26,7 @@ export const FormLinkSchema = z.object({
   name: z.string(),
   url: z.string(),
   description: z.string().optional().nullable(),
-  isOfficial: z.boolean().default(true),
+  isOfficial: z.coerce.boolean().default(true),
 });
 
 export const PortalLinkSchema = z.object({
@@ -46,11 +46,9 @@ export const SimplifiedOutputSchema = z.object({
   fees: z.string().optional().nullable(),
   warnings: z.array(z.string()).optional().nullable(),
   language: z.string().default("en"),
-
-  // NEW FIELDS
   formLinks: z.array(FormLinkSchema).optional().nullable(),
   portalLinks: z.array(PortalLinkSchema).optional().nullable(),
-  visualGuide: z.array(z.string()).optional().nullable(), // step-by-step emoji/text visual
+  visualGuide: z.array(z.string()).optional().nullable(),
 });
 
 export type Step = z.infer<typeof StepSchema>;

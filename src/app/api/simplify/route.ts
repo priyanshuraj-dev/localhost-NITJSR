@@ -58,37 +58,45 @@ function guessMime(url: string): string {
   return "application/pdf";
 }
 
-async function fetchBase64(url: string): Promise<{ base64: string; mimeType: string }> {
+async function fetchBase64(url: string): Promise<{ data: string; mimeType: string }> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch file: ${res.status}`);
   const ct = res.headers.get("content-type") || "";
   const mimeType = (!ct || ct.includes("octet-stream")) ? guessMime(url) : ct.split(";")[0].trim();
-  const base64 = Buffer.from(await res.arrayBuffer()).toString("base64");
-  return { base64, mimeType };
+  const data = Buffer.from(await res.arrayBuffer()).toString("base64");
+  return { data, mimeType };
 }
 
 // ── URL sanitizer ─────────────────────────────────────────────────────────────
 
-const TRUSTED = [
-  "nsdl.co.in","utiitsl.com","incometax.gov.in","mca.gov.in","digilocker.gov.in",
-  "uidai.gov.in","passportindia.gov.in","india.gov.in","epfindia.gov.in","gstn.org.in",
-  "irctc.co.in","eci.gov.in","nhm.gov.in","pmjay.gov.in","digitalindia.gov.in",
-  "onlineservices.nsdl.com","efiling.incometax.gov.in",
-];
-
-function isTrusted(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return u.protocol === "https:" && TRUSTED.some(d => u.hostname === d || u.hostname.endsWith("." + d));
-  } catch { return false; }
-}
-
 function sanitize(data: SimplifiedOutput): SimplifiedOutput {
+  // Only strip entries that aren't valid URLs at all — don't filter by domain
+  // since Gemini is instructed to use real gov URLs and over-filtering causes blank sections
+  const isUrl = (s: string) => {
+    try { new URL(s.startsWith("http") ? s : "https://" + s); return true; }
+    catch { return false; }
+  };
+
+  const cleanUrl = (s: string): string => {
+    if (!s) return s;
+    if (!s.startsWith("http")) return "https://" + s;
+    return s.replace(/^http:\/\//i, "https://");
+  };
+
   return {
     ...data,
-    authority: { ...data.authority, website: data.authority.website && isTrusted(data.authority.website) ? data.authority.website : null },
-    formLinks:   (data.formLinks  ?? []).filter(f => isTrusted(f.url)),
-    portalLinks: (data.portalLinks ?? []).filter(p => isTrusted(p.url)),
+    formLinks: (data.formLinks ?? [])
+      .filter(f => f.url && isUrl(f.url))
+      .map(f => ({ ...f, url: cleanUrl(f.url) })),
+    portalLinks: (data.portalLinks ?? [])
+      .filter(p => p.url && isUrl(p.url))
+      .map(p => ({ ...p, url: cleanUrl(p.url) })),
+    authority: {
+      ...data.authority,
+      website: data.authority.website && isUrl(data.authority.website)
+        ? cleanUrl(data.authority.website)
+        : null,
+    },
   };
 }
 
@@ -120,8 +128,25 @@ export async function POST(req: NextRequest) {
 
     const validated = SimplifiedOutputSchema.safeParse(parsed);
     if (!validated.success) {
-      console.error("Zod errors:", JSON.stringify(validated.error.flatten(), null, 2));
-      return NextResponse.json({ error: "AI response structure mismatch.", details: validated.error.flatten() }, { status: 500 });
+      // Log the error but try to extract data anyway with a lenient approach
+      console.error("Zod validation errors:", JSON.stringify(validated.error.flatten(), null, 2));
+      // Attempt partial extraction — return what we can
+      const partial = parsed as Record<string, unknown>;
+      const fallback = SimplifiedOutputSchema.safeParse({
+        ...partial,
+        // Ensure required fields have defaults
+        title: partial.title || "Document Analysis",
+        summary: partial.summary || "",
+        simplifiedText: partial.simplifiedText || "",
+        steps: Array.isArray(partial.steps) ? partial.steps : [],
+        requiredDocuments: Array.isArray(partial.requiredDocuments) ? partial.requiredDocuments : [],
+        authority: partial.authority || { name: "Unknown", type: "Government" },
+      });
+      if (!fallback.success) {
+        return NextResponse.json({ error: "AI response structure mismatch.", details: validated.error.flatten() }, { status: 500 });
+      }
+      const clean = sanitize(fallback.data);
+      return NextResponse.json({ success: true, data: clean });
     }
 
     const clean = sanitize(validated.data);
