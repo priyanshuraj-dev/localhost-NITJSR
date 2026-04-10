@@ -115,8 +115,11 @@ ${simplifiedOutput}
 USER QUESTION: "${userQuestion}"
 
 Answer in ${LANGUAGES[language] || "English"}.
-- Use simple, everyday language
-- Be specific and actionable
-- If the answer is not in the document, say so clearly
-- Keep response under 150 words
+- Use simple, everyday language.
+- Be specific and actionable.
+- Use the simplified analysis as the main context.
+- If the question is about process steps, fees, documents, forms, or authority, answer using those details.
+- If the document does not mention the answer, say "The document does not mention that."
+- Do not invent details not present in the text or simplified analysis.
+- Keep the response under 150 words.
 `;

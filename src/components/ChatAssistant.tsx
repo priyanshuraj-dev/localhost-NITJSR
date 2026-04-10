@@ -49,7 +49,7 @@ export default function ChatAssistant({ originalText, simplifiedOutput }: { orig
           <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
             {messages.length === 0 && (
               <div className="text-center text-gray-400 text-sm pt-4">
-                <p>Ask anything about this document</p>
+                <p>Ask anything about this document or process; the assistant will use the loaded context.</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-3">
                   {SUGGESTIONS.map((s) => (
                     <button key={s} onClick={() => sendMessage(s, originalText, simplifiedOutput)}
@@ -95,7 +95,7 @@ export default function ChatAssistant({ originalText, simplifiedOutput }: { orig
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask a question about this document..."
+              placeholder="Ask a question about this procedure or document..."
               className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <button onClick={handleSend} disabled={!input.trim() || loading}
