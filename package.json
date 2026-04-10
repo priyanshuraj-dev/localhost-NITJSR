@@ -9,17 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
-<<<<<<< HEAD
     "axios": "^1.15.0",
     "bcryptjs": "^3.0.3",
     "googleapis": "^171.4.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.577.0",
-=======
     "busboy": "^1.6.0",
     "cloudinary": "^2.9.0",
     "jose": "^6.2.2",
->>>>>>> 1368b78790967aa2141f90ff27cf951281f1b667
     "mongoose": "^9.4.1",
     "next": "16.2.3",
     "react": "19.2.4",
@@ -27,11 +24,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-<<<<<<< HEAD
     "@types/jsonwebtoken": "^9.0.10",
-=======
     "@types/busboy": "^1.5.4",
->>>>>>> 1368b78790967aa2141f90ff27cf951281f1b667
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
