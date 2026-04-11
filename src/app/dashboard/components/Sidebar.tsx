@@ -137,7 +137,6 @@ export default function DashboardSidebar({
               <p style={{ fontSize: "13px", fontWeight: 600, color: tk.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {mounted ? (userData?.email ?? "Guest") : "Guest"}
               </p>
-              <p style={{ fontSize: "11px", color: tk.textMuted }}>Free Plan</p>
             </div>
             <button
               onClick={handleLogout}
