@@ -50,13 +50,13 @@ export default function ResultPage() {
 
   if (!originalText && !cloudinaryUrl) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#FAF7F4" }}>
         <div className="text-center space-y-3">
           <p className="text-2xl">📂</p>
-          <p className="text-gray-600">No document found to analyze.</p>
+          <p style={{ color: "#6B5E56" }}>No document found to analyze.</p>
           <button
             onClick={() => (window.location.href = "/")}
-            className="mt-4 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            style={{ marginTop: "16px", padding: "8px 20px", background: "#2C2420", color: "#FAF7F4", border: "none", borderRadius: "100px", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
           >
             Go Back
           </button>
@@ -66,12 +66,12 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: "#FAF7F4" }}>
 
       {/* Top Bar with Language Selector */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
+      <div className="sticky top-0 z-10 px-4 py-3" style={{ background: "rgba(250,247,244,0.95)", backdropFilter: "blur(12px)", borderBottom: "1px solid #F0EBE5" }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4 flex-wrap">
-          <span className="text-sm font-medium text-gray-700">
+          <span style={{ fontSize: "14px", fontWeight: 500, color: "#6B5E56" }}>
             🇮🇳 NyaySetu — Legal Simplifier
           </span>
           <LanguageSelector
@@ -87,10 +87,10 @@ export default function ResultPage() {
       {error && !loading && (
         <div className="max-w-xl mx-auto mt-16 text-center space-y-4 px-4">
           <p className="text-5xl">😕</p>
-          <p className="text-red-500 font-medium">{error}</p>
+          <p style={{ color: "#C0504A", fontWeight: 500 }}>{error}</p>
           <button
             onClick={() => simplify(originalText, language)}
-            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            style={{ padding: "8px 20px", background: "#2C2420", color: "#FAF7F4", border: "none", borderRadius: "100px", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
           >
             Try Again
           </button>

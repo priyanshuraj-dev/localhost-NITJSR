@@ -63,7 +63,7 @@ function DocItem({ doc, index, checked, onToggle }: { doc: Document; index: numb
               {doc.name}
               {doc.required && <span className="ml-2 text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded">Required</span>}
             </span>
-            <button onClick={() => setExpanded(!expanded)} className="text-xs text-blue-500 hover:underline ml-2">
+            <button onClick={() => setExpanded(!expanded)} className="text-xs ml-2" style={{ color: "#E8B4A0", background: "none", border: "none", cursor: "pointer" }}>
               {expanded ? "less" : "more"}
             </button>
           </div>

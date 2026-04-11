@@ -27,6 +27,7 @@ export function useSimplify(): UseSimplifyReturn {
       const res = await fetch("/api/simplify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(body),
       });
 

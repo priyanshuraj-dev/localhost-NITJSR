@@ -85,8 +85,20 @@ Return ONLY a valid JSON object (no markdown, no explanation) with this exact st
 Rules:
 - simplifiedText must be easy to read for a common person
 - steps must be in logical order with relevant emojis as icons
-- formLinks must use real, working government URLs (NSDL, UTIITSL, DigiLocker, MCA, etc.)
-- portalLinks must use real official Indian government portal URLs
+- formLinks: Use ONLY real, verified Indian government form URLs. Examples of valid base domains:
+    PAN: https://www.onlineservices.nsdl.com, https://www.utiitsl.com
+    Income Tax: https://www.incometax.gov.in
+    GST: https://www.gst.gov.in
+    Passport: https://www.passportindia.gov.in
+    Aadhaar: https://myaadhaar.uidai.gov.in
+    EPF: https://unifiedportal-mem.epfindia.gov.in
+    MCA: https://www.mca.gov.in
+    DigiLocker: https://www.digilocker.gov.in
+    RTI: https://rtionline.gov.in
+    Voter ID: https://voters.eci.gov.in
+  Only include formLinks if you are confident the URL path is real. If unsure of the exact path, use the portal homepage URL instead.
+- portalLinks: Use ONLY the homepage or main service page of official portals from the domains above.
+- If no relevant forms or portals exist for this document type, return empty arrays [] for formLinks and portalLinks.
 - visualGuide should be 4-6 short lines, each starting with a relevant emoji, telling the story of the process visually.
 - If the document describes a process, infer the workflow and never leave visualGuide empty.
 - If a field is not found in the text, use your knowledge of Indian government procedures to fill it.

@@ -3,6 +3,9 @@
 import { useState, useCallback, useRef } from "react";
 import { useTokens } from "@/context/TokenContext";
 import { useToast } from "@/components/Toast";
+import dynamic from "next/dynamic";
+
+const DocumentRedactor = dynamic(() => import("@/components/DocumentRedactor"), { ssr: false });
 
 type UploadState = "idle" | "dragging" | "uploading" | "success" | "error";
 type AnalyseState = "idle" | "loading" | "done" | "error";
@@ -19,6 +22,7 @@ interface AnalysisResult {
   steps?: AnalysisStep[];
   requiredDocuments?: string[];
   authorities?: { name: string; role: string; contact: string }[];
+  formLinks?: { name: string; url: string; description?: string }[];
   portalLinks?: { label: string; url: string }[];
   warnings?: string[];
   estimatedTotalTime?: string; difficulty?: string;
@@ -26,10 +30,9 @@ interface AnalysisResult {
 }
 
 const FILE_TYPES = [
-  { id: "pdf",   icon: "📄", label: "PDF",      accept: ".pdf",       color: "#FFF0EB", accent: "#E8B4A0" },
-  { id: "image", icon: "🖼️", label: "Image",    accept: "image/*",    color: "#F0EBFF", accent: "#C4A8E8" },
-  { id: "docx",  icon: "📝", label: "Word Doc", accept: ".docx,.doc", color: "#EBF5EB", accent: "#A8C5A0" },
-  { id: "txt",   icon: "📃", label: "Text",     accept: ".txt",       color: "#FFF5F8", accent: "#E8A0B4" },
+  { id: "pdf",   icon: "📄", label: "PDF",   accept: ".pdf",    color: "#FFF0EB", accent: "#E8B4A0" },
+  { id: "image", icon: "🖼️", label: "Image", accept: "image/*", color: "#F0EBFF", accent: "#C4A8E8" },
+  { id: "txt",   icon: "📃", label: "Text",  accept: ".txt",    color: "#FFF5F8", accent: "#E8A0B4" },
 ];
 const LANGUAGES = ["English","हिन्दी","বাংলা","தமிழ்","తెలుగు","मराठी","ਪੰਜਾਬੀ","ಕನ್ನಡ"];
 const DIFF_BG:  Record<string,string> = { Easy:"#EBF5EB", Moderate:"#FFF8EB", Complex:"#FFEBEB" };
@@ -110,12 +113,64 @@ function AIResponsePanel({ result, onReset }: { result: AnalysisResult; onReset:
                       <p style={{ fontSize:"14px", fontWeight:600, color:"#2C2420", marginBottom:"4px" }}>{s.title}</p>
                       <p style={{ fontSize:"13px", color:"#6B5E56", lineHeight:1.6, marginBottom:"8px" }}>{s.description}</p>
                       <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                        {s.office && <span className="tag-chip" style={{ background:"#EBF0FF", color:"#4060A0" }}>🏛 {s.office}</span>}
+                        {s.office && <span className="tag-chip" style={{ background:"#F0EBE5", color:"#6B5E56" }}>🏛 {s.office}</span>}
                         {s.timeframe && <span className="tag-chip" style={{ background:"#F0EBE5", color:"#6B5E56" }}>⏱ {s.timeframe}</span>}
                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Forms & Portals */}
+          {((result.formLinks && result.formLinks.length > 0) || (result.portalLinks && result.portalLinks.length > 0)) && (
+            <div className="card" style={{ padding:"24px", gridColumn:"1 / -1" }}>
+              <p style={{ fontSize:"12px", fontWeight:600, color:"#A89888", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:"20px" }}>🔗 Forms & Government Portals</p>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"20px" }}>
+                {result.formLinks && result.formLinks.length > 0 && (
+                  <div>
+                    <p style={{ fontSize:"11px", fontWeight:600, color:"#A89888", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:"10px" }}>📄 Official Forms</p>
+                    <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                      {result.formLinks.map((f, i) => (
+                        <a key={i} href={f.url} target="_blank" rel="noreferrer"
+                          style={{ display:"flex", alignItems:"flex-start", gap:"12px", padding:"12px 14px", borderRadius:"14px", border:"1px solid #F0EBE5", background:"#FAF7F4", textDecoration:"none", transition:"all 0.2s" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8B4A0"; (e.currentTarget as HTMLAnchorElement).style.background = "#FFF8F5"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#F0EBE5"; (e.currentTarget as HTMLAnchorElement).style.background = "#FAF7F4"; }}
+                        >
+                          <span style={{ fontSize:"20px", flexShrink:0 }}>📋</span>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <p style={{ fontSize:"13px", fontWeight:600, color:"#2C2420", marginBottom:"2px" }}>{f.name}</p>
+                            {f.description && <p style={{ fontSize:"11px", color:"#A89888", lineHeight:1.5 }}>{f.description}</p>}
+                            <p style={{ fontSize:"11px", color:"#C4845A", marginTop:"2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{f.url}</p>
+                          </div>
+                          <span style={{ color:"#D4C4B0", fontSize:"16px", flexShrink:0 }}>↗</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {result.portalLinks && result.portalLinks.length > 0 && (
+                  <div>
+                    <p style={{ fontSize:"11px", fontWeight:600, color:"#A89888", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:"10px" }}>🌐 Government Portals</p>
+                    <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+                      {result.portalLinks.map((p, i) => (
+                        <a key={i} href={p.url} target="_blank" rel="noreferrer"
+                          style={{ display:"flex", alignItems:"flex-start", gap:"12px", padding:"12px 14px", borderRadius:"14px", border:"1px solid #F0EBE5", background:"#FAF7F4", textDecoration:"none", transition:"all 0.2s" }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8B4A0"; (e.currentTarget as HTMLAnchorElement).style.background = "#FFF8F5"; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderColor = "#F0EBE5"; (e.currentTarget as HTMLAnchorElement).style.background = "#FAF7F4"; }}
+                        >
+                          <span style={{ fontSize:"20px", flexShrink:0 }}>🏛️</span>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <p style={{ fontSize:"13px", fontWeight:600, color:"#2C2420", marginBottom:"2px" }}>{p.label}</p>
+                            <p style={{ fontSize:"11px", color:"#C4845A", marginTop:"2px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{p.url}</p>
+                          </div>
+                          <span style={{ color:"#D4C4B0", fontSize:"16px", flexShrink:0 }}>↗</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -139,6 +194,9 @@ export default function DashboardPage() {
   const [analyseError, setAnalyseError]     = useState("");
   const [result, setResult]                 = useState<AnalysisResult | null>(null);
   const fileInputRef                        = useRef<HTMLInputElement>(null);
+  // Redactor state
+  const [pendingFiles, setPendingFiles]     = useState<File[]>([]);
+  const [showRedactor, setShowRedactor]     = useState(false);
 
   const selectedType = FILE_TYPES.find(ft => ft.id === selectedTypeId);
   const doneFiles    = files.filter(f => f.status === "done");
@@ -146,18 +204,17 @@ export default function DashboardPage() {
     inputMode === "file" ? doneFiles.length > 0 : textInput.trim().length > 0
   );
 
-  const handleFiles = useCallback(async (rawFiles: FileList | File[]) => {
-    const arr = Array.from(rawFiles) as File[];
-    if (arr.length === 0) return;
+  const uploadFiles = useCallback(async (rawFiles: File[]) => {
+    if (rawFiles.length === 0) return;
     setUploadState("uploading");
-    const newFiles: UploadedFile[] = arr.map(f => ({
+    const newFiles: UploadedFile[] = rawFiles.map(f => ({
       id: Math.random().toString(36).slice(2),
       name: f.name, size: formatBytes(f.size),
       ...getFileTypeInfo(f), status: "uploading" as const,
     }));
     setFiles(prev => [...newFiles, ...prev]);
-    for (let i = 0; i < arr.length; i++) {
-      const file = arr[i]; const entry = newFiles[i];
+    for (let i = 0; i < rawFiles.length; i++) {
+      const file = rawFiles[i]; const entry = newFiles[i];
       try {
         const fd = new FormData();
         fd.append("file", file); fd.append("title", file.name);
@@ -177,7 +234,20 @@ export default function DashboardPage() {
       }
     }
     setUploadState("success");
-  }, []);
+  }, [toast]);
+
+  const handleFiles = useCallback(async (rawFiles: FileList | File[]) => {
+    const arr = Array.from(rawFiles) as File[];
+    if (arr.length === 0) return;
+    // Show redactor for PDFs and images (single file at a time)
+    const redactable = arr[0];
+    if (redactable.type === "application/pdf" || redactable.type.startsWith("image/")) {
+      setPendingFiles(arr);
+      setShowRedactor(true);
+    } else {
+      await uploadFiles(arr);
+    }
+  }, [uploadFiles]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setUploadState("idle"); handleFiles(e.dataTransfer.files);
@@ -186,6 +256,20 @@ export default function DashboardPage() {
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) handleFiles(e.target.files);
   }, [handleFiles]);
+
+  const handleRedactorConfirm = useCallback(async (redactedFile: File) => {
+    setShowRedactor(false);
+    const remaining = pendingFiles.slice(1);
+    await uploadFiles([redactedFile, ...remaining]);
+    setPendingFiles([]);
+  }, [pendingFiles, uploadFiles]);
+
+  const handleRedactorCancel = useCallback(async () => {
+    setShowRedactor(false);
+    // Upload original files without redaction
+    await uploadFiles(pendingFiles);
+    setPendingFiles([]);
+  }, [pendingFiles, uploadFiles]);
 
   const removeFile = (id: string) => {
     setFiles(prev => prev.filter(f => f.id !== id));
@@ -229,6 +313,14 @@ export default function DashboardPage() {
 
   return (
     <div style={{ animation: "fadeSlideUp 0.5s ease both" }}>
+      {/* Redactor modal */}
+      {showRedactor && pendingFiles.length > 0 && (
+        <DocumentRedactor
+          file={pendingFiles[0]}
+          onConfirm={handleRedactorConfirm}
+          onCancel={handleRedactorCancel}
+        />
+      )}
 
       {/* ── Hero Header ─────────────────────────────────────────────────── */}
       <div style={{
@@ -364,14 +456,14 @@ export default function DashboardPage() {
                   <div style={{ position:"absolute", top:"-30px", right:"-30px", width:"120px", height:"120px", borderRadius:"50%", background:"radial-gradient(circle, rgba(232,160,180,0.07) 0%, transparent 70%)", pointerEvents:"none" }} />
 
                   <input ref={fileInputRef} type="file" multiple
-                    accept={selectedType ? selectedType.accept : ".pdf,.docx,.doc,.txt,image/*"}
+                    accept={selectedType ? selectedType.accept : ".pdf,.txt,image/*"}
                     style={{ display:"none" }} onChange={handleFileInput} />
 
                   {uploadState === "idle" && (
                     <>
                       <div style={{ width:"60px", height:"60px", borderRadius:"18px", background:"linear-gradient(135deg,#FFF0EB,#FFE8F0)", border:"1px solid rgba(232,160,180,0.25)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"26px", margin:"0 auto 18px" }}>⬆</div>
                       <p style={{ fontSize:"16px", fontWeight:600, color:t.text, marginBottom:"6px" }}>Drop your document here</p>
-                      <p style={{ fontSize:"13px", color:t.textMuted, marginBottom:"22px", lineHeight:1.6 }}>PDF, JPG, PNG, DOCX, TXT · Max 10 MB</p>
+                      <p style={{ fontSize:"13px", color:t.textMuted, marginBottom:"22px", lineHeight:1.6 }}>PDF, JPG, PNG, TXT · Max 10 MB</p>
                       <button onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
                         style={{ fontSize:"13px", padding:"11px 26px", background:"linear-gradient(135deg,#2C2420,#3D2030)", color:"#FAF7F4", border:"none", cursor:"pointer", borderRadius:"100px", fontFamily:"'DM Sans', sans-serif", fontWeight:600, boxShadow:"0 4px 16px rgba(44,36,32,0.25)", transition:"all 0.2s" }}>
                         Browse Files
@@ -406,7 +498,7 @@ export default function DashboardPage() {
                       {files.map(f => (
                         <div key={f.id} style={{ display:"flex", alignItems:"center", gap:"12px", padding:"12px 14px", borderRadius:"14px", background:dark ? t.bgSubtle : "#FAF7F4", border:`1px solid ${dark ? t.border : "#F0EBE5"}` }}>
                           <div style={{ width:"36px", height:"36px", borderRadius:"10px", background:f.typeColor, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"16px", flexShrink:0 }}>
-                            {f.typeLabel === "PDF" ? "📄" : f.typeLabel === "Image" ? "🖼️" : f.typeLabel === "Word" ? "📝" : "📃"}
+                            {f.typeLabel === "PDF" ? "📄" : f.typeLabel === "Image" ? "🖼️" : "📃"}
                           </div>
                           <div style={{ flex:1, minWidth:0 }}>
                             <p style={{ fontSize:"13px", fontWeight:600, color:t.text, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{f.name}</p>
@@ -527,7 +619,6 @@ export default function DashboardPage() {
               {[
                 { icon:"📄", label:"PDF",    desc:"Up to 10 MB",    color:"#FFF0EB" },
                 { icon:"🖼️", label:"Images", desc:"JPG, PNG, WebP", color:"#F0EBFF" },
-                { icon:"📝", label:"Word",   desc:".docx, .doc",    color:"#EBF5EB" },
                 { icon:"📃", label:"Text",   desc:".txt files",     color:"#FFF5F8" },
               ].map((f, i) => (
                 <div key={i} style={{ padding:"14px", borderRadius:"14px", background:dark ? t.bgSubtle : f.color, border:`1px solid ${dark ? t.border : "transparent"}` }}>
