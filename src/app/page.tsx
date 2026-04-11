@@ -254,9 +254,11 @@ export default function HomePage() {
             </p>
 
             <div className="hero-cta" style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "44px" }}>
+              <a href="/dashboard">
               <button className="pill-btn pill-btn-gradient" style={{ fontSize: "15px", padding: "16px 32px" }}>
                 Upload a Document ↑
               </button>
+              </a>
               <button className="pill-btn pill-btn-ghost" style={{ fontSize: "15px", padding: "16px 32px" }}>
                 Browse Procedures
               </button>

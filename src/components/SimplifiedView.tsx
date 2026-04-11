@@ -38,12 +38,14 @@ export default function SimplifiedView({ data, originalText, onReset }: Props) {
           <h1 className="text-2xl font-bold text-gray-900">{data.title}</h1>
           <p className="text-sm text-gray-500 mt-1">AI-Simplified Result</p>
         </div>
+        <a href='/dashboard'>
         <button
           onClick={onReset}
           style={{ fontSize: "13px", padding: "8px 18px", borderRadius: "100px", border: "1.5px solid #E8E0D4", background: "transparent", color: "#6B5E56", cursor: "pointer" }}
         >
           ← Analyze New Document
         </button>
+        </a>
       </div>
 
       {/* Quick Stats */}
